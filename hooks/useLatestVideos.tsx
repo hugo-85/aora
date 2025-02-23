@@ -1,10 +1,10 @@
-import { getLatestVideos } from "lib/appwrite";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { Models } from "react-native-appwrite";
+import { getLatestVideos } from "lib/appwrite";
+import { VideoType } from "types/common";
 
 export default function useLatestVideos() {
-  const [videos, setVideos] = useState<Models.Document[]>([]);
+  const [videos, setVideos] = useState<VideoType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchVideos = async () => {

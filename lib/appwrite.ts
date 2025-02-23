@@ -4,7 +4,10 @@ import {
   Client,
   Databases,
   ID,
+  ImageGravity,
+  Models,
   Query,
+  Storage,
 } from "react-native-appwrite";
 import {
   REACT_APP_APPWRITE_ENDPOINT,
@@ -15,6 +18,8 @@ import {
   REACT_APP_APPWRITE_VIDEO_COLLECTION_ID,
   REACT_APP_APPWRITE_STORAGE_ID,
 } from "@env";
+import { UserType, VideoType } from "types/common";
+import { ImagePickerAsset } from "expo-image-picker";
 
 const endpoint = REACT_APP_APPWRITE_ENDPOINT;
 const platform = REACT_APP_APPWRITE_PLATFORM;
@@ -36,6 +41,7 @@ client.setEndpoint(endpoint).setProject(projectId).setPlatform(platform);
 let account = null;
 let avatars = null;
 let databases = null;
+let storage = null;
 
 if (!account) {
   account = new Account(client);
@@ -49,6 +55,9 @@ if (!databases) {
   databases = new Databases(client);
 }
 
+if (!storage) {
+  storage = new Storage(client);
+}
 export const createUser = async ({
   email,
   password,
@@ -116,11 +125,10 @@ export const getCurrentUser = async () => {
 
     if (!account) throw new Error("Failed to get account");
 
-    const currentUser = await databases.listDocuments(
-      databaseId,
-      userCollectionId,
-      [Query.equal("accountId", currentAccount.$id)]
-    );
+    const currentUser: Models.DocumentList<UserType> =
+      await databases.listDocuments(databaseId, userCollectionId, [
+        Query.equal("accountId", currentAccount.$id),
+      ]);
 
     if (!currentUser) throw new Error("Failed to get user");
 
@@ -133,7 +141,10 @@ export const getCurrentUser = async () => {
 
 export const getAllVideos = async () => {
   try {
-    const videos = await databases.listDocuments(databaseId, videoCollectionId);
+    const videos: Models.DocumentList<VideoType> =
+      await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.orderDesc("$createdAt"),
+      ]);
 
     if (!videos) throw new Error("Failed to get videos");
 
@@ -146,17 +157,158 @@ export const getAllVideos = async () => {
 
 export const getLatestVideos = async () => {
   try {
-    const videos = await databases.listDocuments(
-      databaseId,
-      videoCollectionId,
-      [Query.orderDesc("$createdAt"), Query.limit(10)]
-    );
+    const videos: Models.DocumentList<VideoType> =
+      await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.orderDesc("$createdAt"),
+        Query.limit(10),
+      ]);
 
     if (!videos) throw new Error("Failed to get latest videos");
 
     return videos.documents;
   } catch (e: any) {
     console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const searchVideos = async (query: string) => {
+  try {
+    const videos: Models.DocumentList<VideoType> =
+      await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.search("title", query),
+        Query.limit(10),
+      ]);
+
+    if (!videos) throw new Error("Failed to get videos");
+
+    return videos.documents;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const getUserVideos = async (userId: string) => {
+  try {
+    const videos: Models.DocumentList<VideoType> =
+      await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.equal("creator", userId),
+        Query.orderDesc("$createdAt"),
+      ]);
+
+    if (!videos) throw new Error("Failed to get users videos");
+
+    return videos.documents;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const logOut = async () => {
+  try {
+    const session = await account.deleteSession("current");
+
+    return session;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+const getFilePreview = async (fileId: string, type: string) => {
+  let fileUrl = null;
+  try {
+    if (type === "image") {
+      fileUrl = await storage.getFilePreview(
+        storageId,
+        fileId,
+        2000,
+        2000,
+        ImageGravity.Top,
+        100
+      );
+    } else if (type === "video") {
+      fileUrl = await storage.getFileView(storageId, fileId);
+      // https://cloud.appwrite.io/v1/storage/buckets/[BUCKET_ID]/files/[FILE_ID]/view?project=[PROJECT_ID]
+      // fileUrl = `https://cloud.appwrite.io/v1/storage/buckets/${storageId}/files/${fileId}/view?project=${projectId}`;
+    } else {
+      throw new Error("Invalid file type");
+    }
+
+    if (!fileUrl) throw new Error("Failed to get file preview");
+
+    console.log("File URL", fileUrl);
+
+    return fileUrl;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+const uploadFile = async (file: ImagePickerAsset, type: string) => {
+  try {
+    const name =
+      file.fileName && file.fileName !== ""
+        ? file.fileName
+        : file.uri.split("/").pop() || ID.unique();
+    const asset = {
+      type: file.mimeType as string,
+      size: file.fileSize as number,
+      name,
+      uri: file.uri as string,
+    };
+
+    try {
+      const fileData = await storage.createFile(storageId, ID.unique(), asset);
+      const fileUrl = await getFilePreview(fileData.$id, type);
+
+      return fileUrl;
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const createVideo = async ({
+  title,
+  video,
+  thumbnail,
+  prompt,
+  userId,
+}: {
+  title: string;
+  video: ImagePickerAsset;
+  thumbnail: ImagePickerAsset;
+  prompt: string;
+  userId: string;
+}) => {
+  try {
+    const [videoUrl, thumbnailUrl] = await Promise.all([
+      uploadFile(video, "video"),
+      uploadFile(thumbnail, "image"),
+    ]);
+
+    const newVideo = await databases.createDocument(
+      databaseId,
+      videoCollectionId,
+      ID.unique(),
+      {
+        title,
+        video: videoUrl,
+        thumbnail: thumbnailUrl,
+        prompt,
+        creator: userId,
+      }
+    );
+
+    return newVideo;
+  } catch (e: any) {
     throw new Error(e);
   }
 };

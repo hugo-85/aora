@@ -2,6 +2,8 @@ import { FC, useState } from "react";
 import { View, Text, Image, Pressable } from "react-native";
 import { VideoType } from "types/common";
 import icons from "@constants/icons";
+import { useVideoPlayer, VideoView } from "expo-video";
+import { useEvent } from "expo";
 
 type VideoCardProps = {
   video: VideoType;
@@ -16,6 +18,23 @@ const VideoCard: FC<VideoCardProps> = ({
   },
 }) => {
   const [play, setPlay] = useState(false);
+  const player = useVideoPlayer({ uri: video }, (player) => {
+    player.loop = false;
+    // player.play();
+  });
+  const { isPlaying } = useEvent(player, "playingChange", {
+    isPlaying: player.playing,
+  });
+
+  const handleOnPress = () => {
+    if (isPlaying) {
+      setPlay(false);
+      player.pause();
+    } else {
+      setPlay(true);
+      player.play();
+    }
+  };
 
   return (
     <View className="flex-col items-center px-4 mb-14">
@@ -45,10 +64,24 @@ const VideoCard: FC<VideoCardProps> = ({
         </View>
       </View>
       {play ? (
-        <Text>playin</Text>
+        <View className="w-full h-60 max-h-60 rounded-xl mt-3 relative justify-center items-center">
+          <VideoView
+            style={{
+              width: 400,
+              maxWidth: "100%",
+              height: 200,
+              borderRadius: 15,
+            }}
+            player={player}
+            allowsFullscreen
+            allowsPictureInPicture
+            nativeControls
+            contentFit="fill"
+          />
+        </View>
       ) : (
         <Pressable
-          onPress={() => setPlay(true)}
+          onPress={handleOnPress}
           className="w-full h-60 rounded-xl mt-3 relative justify-center items-center
           active:opacity-40"
         >

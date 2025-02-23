@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { getAllVideos, getUserVideos } from "lib/appwrite";
+import { searchVideos } from "lib/appwrite";
 import { VideoType } from "types/common";
 
-export default function useVideos(userId?: string) {
+export default function useSearch(query: string) {
   const [videos, setVideos] = useState<VideoType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -11,10 +11,8 @@ export default function useVideos(userId?: string) {
     setIsLoading(true);
 
     try {
-      const videosResult = userId
-        ? await getUserVideos(userId)
-        : await getAllVideos();
-      setVideos(videosResult);
+      const searchResults = await searchVideos(query);
+      setVideos(searchResults);
     } catch (error: any) {
       Alert.alert("Error", error.message);
     } finally {

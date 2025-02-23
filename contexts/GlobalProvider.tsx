@@ -1,13 +1,14 @@
 import { getCurrentUser } from "lib/appwrite";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Models } from "react-native-appwrite";
+import { UserType } from "types/common";
 
 type GlobalContextType = {
   updateIsLoggedIn: (value: boolean) => void;
   updateUser: (newUser: any) => void;
   updateIsLoading: (value: boolean) => void;
   isLoggedIn: boolean;
-  user: Models.Document | null;
+  user: UserType | null;
   isLoading: boolean;
 };
 

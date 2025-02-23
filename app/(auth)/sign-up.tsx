@@ -4,7 +4,7 @@ import images from "@constants/images";
 import { useForm } from "react-hook-form";
 import FormField from "@components/customs/FormField";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { signUpValidationSchema } from "./signUpValidations";
+import { signUpValidationSchema } from "../../validations/signUpValidations";
 import CustomButton from "@components/customs/CustomButton";
 import { useState } from "react";
 import { Link, router } from "expo-router";

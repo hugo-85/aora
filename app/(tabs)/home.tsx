@@ -1,7 +1,7 @@
-import { Text, FlatList, Image, RefreshControl } from "react-native";
+import { FlatList, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import EmptyVideos from "@components/home/EmptyVideos";
+import EmptyVideos from "@components/EmptyVideos";
 import useVideos from "hooks/useVideos";
 import HomeListHeader from "@components/home/HomeListHeader";
 import VideoCard from "@components/VideoCard";
