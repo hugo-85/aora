@@ -10,6 +10,8 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useGlobal } from "contexts/GlobalProvider";
 import { createVideo } from "lib/appwrite";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { createValidationSchema } from "validations/createValidations";
 
 type FormCreateType = {
   title: string;
@@ -27,12 +29,14 @@ export default function CreatePage() {
   const [uploading, setUploading] = useState(false);
   const {
     control,
-    formState: { errors },
+    formState: { errors, isValid },
     handleSubmit,
     setValue,
+    reset,
   } = useForm<FormCreateType>({
     defaultValues,
-    // resolver: yupResolver(signUpValidationSchema),
+    resolver: yupResolver(createValidationSchema),
+    mode: "onChange",
   });
   const { video, thumbnail } = useWatch({ control });
   const { user } = useGlobal();
@@ -70,9 +74,7 @@ export default function CreatePage() {
         prompt: data.prompt,
         userId: user?.$id || "",
       });
-
-      console.log("newVideo", newVideo);
-
+      reset(defaultValues);
       router.push("/home");
     } catch (error: any) {
       Alert.alert("Error", error.message);
@@ -91,6 +93,7 @@ export default function CreatePage() {
           placeholder="Give your video a nice title"
           name="title"
           otherStyles="mt-6"
+          error={errors.title?.message}
         />
         <View className="my-2 space-y-2">
           <Text className="text-base text-gray-100 font-pmedium">
@@ -134,7 +137,7 @@ export default function CreatePage() {
 
         <View className="mt-4 space-y-2">
           <Text className="text-base text-gray-100 font-pmedium">
-            Thumbnail Iamge
+            Thumbnail Image
           </Text>
 
           <Pressable onPress={() => openPicker("image")}>
@@ -169,13 +172,14 @@ export default function CreatePage() {
           placeholder="The prompt used with the AI to generate the video"
           name="prompt"
           otherStyles="mt-4"
+          error={errors.prompt?.message}
         />
 
         <CustomButton
           title="Upload Video"
           onPress={handleSubmit((data) => submit(data))}
           containerStyles="mt-3"
-          disabled={uploading}
+          disabled={uploading || !isValid}
         />
       </ScrollView>
     </SafeAreaView>

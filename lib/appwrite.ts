@@ -16,9 +16,10 @@ import {
   REACT_APP_APPWRITE_DATABASE_ID,
   REACT_APP_APPWRITE_USER_COLLECTION_ID,
   REACT_APP_APPWRITE_VIDEO_COLLECTION_ID,
+  REACT_APP_APPWRITE_LIKES_COLLECTION_ID,
   REACT_APP_APPWRITE_STORAGE_ID,
 } from "@env";
-import { UserType, VideoType } from "types/common";
+import { UserLikesType, UserType, VideoType } from "types/common";
 import { ImagePickerAsset } from "expo-image-picker";
 
 const endpoint = REACT_APP_APPWRITE_ENDPOINT;
@@ -27,6 +28,7 @@ const projectId = REACT_APP_APPWRITE_PROJECT_ID;
 const databaseId = REACT_APP_APPWRITE_DATABASE_ID;
 const userCollectionId = REACT_APP_APPWRITE_USER_COLLECTION_ID;
 const videoCollectionId = REACT_APP_APPWRITE_VIDEO_COLLECTION_ID;
+const userLikesCollectionId = REACT_APP_APPWRITE_LIKES_COLLECTION_ID;
 const storageId = REACT_APP_APPWRITE_STORAGE_ID;
 
 // Init your React Native SDK
@@ -221,25 +223,15 @@ const getFilePreview = async (fileId: string, type: string) => {
   let fileUrl = null;
   try {
     if (type === "image") {
-      fileUrl = await storage.getFilePreview(
-        storageId,
-        fileId,
-        2000,
-        2000,
-        ImageGravity.Top,
-        100
-      );
+      //getFilePreview is not longer supported in the free plan
+      fileUrl = await storage.getFileView(storageId, fileId);
     } else if (type === "video") {
       fileUrl = await storage.getFileView(storageId, fileId);
-      // https://cloud.appwrite.io/v1/storage/buckets/[BUCKET_ID]/files/[FILE_ID]/view?project=[PROJECT_ID]
-      // fileUrl = `https://cloud.appwrite.io/v1/storage/buckets/${storageId}/files/${fileId}/view?project=${projectId}`;
     } else {
       throw new Error("Invalid file type");
     }
 
     if (!fileUrl) throw new Error("Failed to get file preview");
-
-    console.log("File URL", fileUrl);
 
     return fileUrl;
   } catch (e: any) {
@@ -309,6 +301,97 @@ export const createVideo = async ({
 
     return newVideo;
   } catch (e: any) {
+    throw new Error(e);
+  }
+};
+
+export const likeVideo = async (userId: string, videoId: string) => {
+  try {
+    console.log("likeVideo", { userId, videoId });
+    const like = await databases.createDocument(
+      databaseId,
+      userLikesCollectionId,
+      ID.unique(),
+      {
+        userId,
+        videoId,
+      }
+    );
+    console.log("likeVideo", { like });
+
+    return like;
+  } catch (e: any) {
+    console.log("likeVideo Error", e);
+    throw new Error(e);
+  }
+};
+
+export const getLikedVideos = async (userId: string) => {
+  try {
+    const likes: Models.DocumentList<UserLikesType> =
+      await databases.listDocuments(databaseId, userLikesCollectionId, [
+        Query.equal("userId", userId),
+      ]);
+
+    if (!likes || likes.total === 0) return [];
+
+    const videoIds = likes.documents.map((like) => like.videoId);
+    return videoIds;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const unlikeVideo = async (userId: string, videoId: string) => {
+  try {
+    const likes: Models.DocumentList<UserLikesType> =
+      await databases.listDocuments(databaseId, userLikesCollectionId, [
+        Query.equal("userId", userId),
+        Query.equal("videoId", videoId),
+      ]);
+
+    if (!likes || likes.documents.length === 0) {
+      throw new Error("Like not found");
+    }
+
+    const likeId = likes.documents[0].$id;
+
+    await databases.deleteDocument(databaseId, userLikesCollectionId, likeId);
+
+    return true;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const checkVideoIsLiked = async (userId: string, videoId: string) => {
+  try {
+    const likes: Models.DocumentList<UserLikesType> =
+      await databases.listDocuments(databaseId, userLikesCollectionId, [
+        Query.equal("userId", userId),
+        Query.equal("videoId", videoId),
+      ]);
+
+    return likes.documents.length > 0;
+  } catch (e: any) {
+    console.log(e);
+    throw new Error(e);
+  }
+};
+
+export const deleteVideo = async (videoId: string) => {
+  try {
+    const video = await databases.deleteDocument(
+      databaseId,
+      videoCollectionId,
+      videoId
+    );
+
+    return video;
+  } catch (e: any) {
+    console.log(e);
     throw new Error(e);
   }
 };

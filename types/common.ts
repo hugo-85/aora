@@ -13,3 +13,8 @@ export interface UserType extends Models.Document {
   email: string;
   username: string;
 }
+
+export interface UserLikesType extends Models.Document {
+  videoId: VideoType;
+  userId: string;
+}

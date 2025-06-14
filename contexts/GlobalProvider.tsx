@@ -1,6 +1,5 @@
 import { getCurrentUser } from "lib/appwrite";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Models } from "react-native-appwrite";
 import { UserType } from "types/common";
 
 type GlobalContextType = {

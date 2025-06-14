@@ -1,30 +1,105 @@
-import { FC, useState } from "react";
-import { View, Text, Image, Pressable } from "react-native";
+import { FC, useEffect, useState } from "react";
+import { View, Text, Image, Pressable, Alert } from "react-native";
 import { VideoType } from "types/common";
 import icons from "@constants/icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEvent } from "expo";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import {
+  checkVideoIsLiked,
+  deleteVideo,
+  likeVideo,
+  unlikeVideo,
+} from "lib/appwrite";
+import { useGlobal } from "contexts/GlobalProvider";
+import useVideos from "hooks/useVideos";
+
+type VideoCardMenuProps = {
+  videoId: string;
+  refreshVideos: () => void;
+};
+
+const VideoCardMenu: FC<VideoCardMenuProps> = ({ videoId, refreshVideos }) => {
+  const handleDelete = async () => {
+    try {
+      await deleteVideo(videoId);
+      Alert.alert("Success", "Video deleted successfully");
+      refreshVideos(); //mirar no se actualiza la lista de videos, quizas deba usar el refreshCallback
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  return (
+    <Menu>
+      <MenuTrigger>
+        <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
+      </MenuTrigger>
+      <MenuOptions
+        customStyles={{
+          optionsContainer: {
+            backgroundColor: "#1c1c1e",
+            borderRadius: 10,
+            padding: 10,
+            marginTop: 25,
+            width: 120,
+            alignItems: "flex-start",
+          },
+        }}
+      >
+        <MenuOption onSelect={handleDelete}>
+          <View className="flex-row gap-2 items-center">
+            <AntDesign name="delete" size={18} color="white" />
+            <Text className="text-white font-psemibold text-sm">Delete</Text>
+          </View>
+        </MenuOption>
+      </MenuOptions>
+    </Menu>
+  );
+};
 
 type VideoCardProps = {
   video: VideoType;
+  refreshCallback?: () => void;
 };
 
-const VideoCard: FC<VideoCardProps> = ({
-  video: {
+const VideoCard: FC<VideoCardProps> = ({ video, refreshCallback }) => {
+  const {
+    $id,
     title,
     thumbnail,
-    video,
+    video: videoUrl,
     creator: { username, avatar },
-  },
-}) => {
+  } = video;
+  const { user } = useGlobal();
   const [play, setPlay] = useState(false);
-  const player = useVideoPlayer({ uri: video }, (player) => {
+  const player = useVideoPlayer({ uri: videoUrl }, (player) => {
     player.loop = false;
     // player.play();
   });
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
   });
+  const [isLiked, setIsLiked] = useState(false);
+  const { refreshVideos } = useVideos();
+
+  useEffect(() => {
+    const checkIsLiked = async () => {
+      if (!user) return;
+      const isLiked = await checkVideoIsLiked(user?.$id, $id);
+
+      setIsLiked(isLiked);
+    };
+
+    checkIsLiked();
+  }, [video]);
 
   const handleOnPress = () => {
     if (isPlaying) {
@@ -34,6 +109,22 @@ const VideoCard: FC<VideoCardProps> = ({
       setPlay(true);
       player.play();
     }
+  };
+
+  const handleOnPressLike = async () => {
+    console.log("handleOnPressLike", { user: user?.$id, $id });
+    try {
+      if (!isLiked) await likeVideo(user?.$id as string, $id);
+      else await unlikeVideo(user?.$id as string, $id);
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+
+    setIsLiked(!isLiked);
+
+    if (refreshCallback) refreshCallback();
+
+    refreshVideos();
   };
 
   return (
@@ -48,19 +139,29 @@ const VideoCard: FC<VideoCardProps> = ({
             />
           </View>
           <View className="justify-center flex-1 ml-3 gap-y-1">
-            <Text
-              className="text-white font-psemibold text-sm"
-              numberOfLines={1}
-            >
-              {title}
-            </Text>
+            <View className="flex-row gap-2 items-center">
+              <Text
+                className="text-white font-psemibold text-sm"
+                numberOfLines={1}
+              >
+                {title}
+              </Text>
+              <Pressable onPress={handleOnPressLike}>
+                {isLiked && (
+                  <Ionicons name="bookmark" size={18} color="#ff9500" />
+                )}
+                {!isLiked && (
+                  <Ionicons name="bookmark-outline" size={18} color="white" />
+                )}
+              </Pressable>
+            </View>
             <Text className="text-xs text-gray-100 font-pregular">
               {username}
             </Text>
           </View>
         </View>
         <View className="pt-2">
-          <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
+          <VideoCardMenu videoId={video.$id} refreshVideos={refreshVideos} />
         </View>
       </View>
       {play ? (
