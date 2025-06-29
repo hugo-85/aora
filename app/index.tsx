@@ -33,7 +33,7 @@ export default function index() {
           <Image
             source={images.cards}
             resizeMode="contain"
-            className="max-w-[300px] w-full h-[300px]"
+            className="max-w-[340px] w-full h-[340px]"
           />
         </View>
         <View className="relative mt-5 justify-center items-center">

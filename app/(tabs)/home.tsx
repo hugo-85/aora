@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FlatList, RefreshControl } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EmptyVideos from "@components/EmptyVideos";
 import useVideos from "hooks/useVideos";
@@ -13,14 +13,15 @@ import {
 } from "lib/observable";
 
 export default function HomePage() {
-  const { isLoading, videos, refreshVideos } = useVideos();
+  const { isLoading, videos, refreshVideos, loadMoreVideos, hasMore } =
+    useVideos();
 
   const onRefresh = async () => {
     await refreshVideos();
   };
 
   const refreshHome = async ({ key, paths }: NotifyObserversType) => {
-    if (key !== "REFRESH" && !paths?.includes("HOME")) return;
+    if (key !== "REFRESH" || !paths?.includes("HOME")) return;
 
     await refreshVideos();
   };
@@ -46,7 +47,11 @@ export default function HomePage() {
         data={videos}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <VideoCard video={item} refreshCallback={sendRefresh} />
+          <VideoCard
+            video={item}
+            refreshCallback={sendRefresh}
+            refreshVideos={refreshVideos}
+          />
         )}
         ListHeaderComponent={<HomeListHeader />}
         ListEmptyComponent={() => (
@@ -57,6 +62,13 @@ export default function HomePage() {
         )}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
+        }
+        onEndReached={() => {
+          if (hasMore && !isLoading) loadMoreVideos();
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          hasMore && isLoading ? <ActivityIndicator size="large" /> : null
         }
       />
     </SafeAreaView>

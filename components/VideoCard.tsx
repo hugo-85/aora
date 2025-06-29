@@ -19,7 +19,6 @@ import {
   unlikeVideo,
 } from "lib/appwrite";
 import { useGlobal } from "contexts/GlobalProvider";
-import useVideos from "hooks/useVideos";
 
 type VideoCardMenuProps = {
   videoId: string;
@@ -67,10 +66,15 @@ const VideoCardMenu: FC<VideoCardMenuProps> = ({ videoId, refreshVideos }) => {
 
 type VideoCardProps = {
   video: VideoType;
+  refreshVideos: () => void;
   refreshCallback?: () => void;
 };
 
-const VideoCard: FC<VideoCardProps> = ({ video, refreshCallback }) => {
+const VideoCard: FC<VideoCardProps> = ({
+  video,
+  refreshVideos,
+  refreshCallback,
+}) => {
   const {
     $id,
     title,
@@ -88,7 +92,7 @@ const VideoCard: FC<VideoCardProps> = ({ video, refreshCallback }) => {
     isPlaying: player.playing,
   });
   const [isLiked, setIsLiked] = useState(false);
-  const { refreshVideos } = useVideos();
+  // const { refreshVideos } = useVideos();
 
   useEffect(() => {
     const checkIsLiked = async () => {
@@ -112,7 +116,6 @@ const VideoCard: FC<VideoCardProps> = ({ video, refreshCallback }) => {
   };
 
   const handleOnPressLike = async () => {
-    console.log("handleOnPressLike", { user: user?.$id, $id });
     try {
       if (!isLiked) await likeVideo(user?.$id as string, $id);
       else await unlikeVideo(user?.$id as string, $id);
@@ -123,8 +126,6 @@ const VideoCard: FC<VideoCardProps> = ({ video, refreshCallback }) => {
     setIsLiked(!isLiked);
 
     if (refreshCallback) refreshCallback();
-
-    refreshVideos();
   };
 
   return (

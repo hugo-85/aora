@@ -4,7 +4,6 @@ import {
   Client,
   Databases,
   ID,
-  ImageGravity,
   Models,
   Query,
   Storage,
@@ -141,12 +140,20 @@ export const getCurrentUser = async () => {
   }
 };
 
-export const getAllVideos = async () => {
+export const getAllVideos = async (page?: number, size?: number) => {
   try {
+    const queries = [
+      Query.equal("deleted", false),
+      Query.orderDesc("$createdAt"),
+    ];
+
+    if (typeof page === "number" && typeof size === "number") {
+      queries.push(Query.limit(size));
+      queries.push(Query.offset(page * size));
+    }
+
     const videos: Models.DocumentList<VideoType> =
-      await databases.listDocuments(databaseId, videoCollectionId, [
-        Query.orderDesc("$createdAt"),
-      ]);
+      await databases.listDocuments(databaseId, videoCollectionId, queries);
 
     if (!videos) throw new Error("Failed to get videos");
 
@@ -161,6 +168,7 @@ export const getLatestVideos = async () => {
   try {
     const videos: Models.DocumentList<VideoType> =
       await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.equal("deleted", false),
         Query.orderDesc("$createdAt"),
         Query.limit(10),
       ]);
@@ -178,6 +186,7 @@ export const searchVideos = async (query: string) => {
   try {
     const videos: Models.DocumentList<VideoType> =
       await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.equal("deleted", false),
         Query.search("title", query),
         Query.limit(10),
       ]);
@@ -195,6 +204,7 @@ export const getUserVideos = async (userId: string) => {
   try {
     const videos: Models.DocumentList<VideoType> =
       await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.equal("deleted", false),
         Query.equal("creator", userId),
         Query.orderDesc("$createdAt"),
       ]);
@@ -307,7 +317,6 @@ export const createVideo = async ({
 
 export const likeVideo = async (userId: string, videoId: string) => {
   try {
-    console.log("likeVideo", { userId, videoId });
     const like = await databases.createDocument(
       databaseId,
       userLikesCollectionId,
@@ -317,7 +326,6 @@ export const likeVideo = async (userId: string, videoId: string) => {
         videoId,
       }
     );
-    console.log("likeVideo", { like });
 
     return like;
   } catch (e: any) {
@@ -336,7 +344,14 @@ export const getLikedVideos = async (userId: string) => {
     if (!likes || likes.total === 0) return [];
 
     const videoIds = likes.documents.map((like) => like.videoId);
-    return videoIds;
+
+    const videos: Models.DocumentList<VideoType> =
+      await databases.listDocuments(databaseId, videoCollectionId, [
+        Query.equal("$id", videoIds),
+        Query.equal("deleted", false),
+      ]);
+
+    return videos.documents;
   } catch (e: any) {
     console.log(e);
     throw new Error(e);
@@ -383,10 +398,11 @@ export const checkVideoIsLiked = async (userId: string, videoId: string) => {
 
 export const deleteVideo = async (videoId: string) => {
   try {
-    const video = await databases.deleteDocument(
+    const video = await databases.updateDocument(
       databaseId,
       videoCollectionId,
-      videoId
+      videoId,
+      { deleted: true }
     );
 
     return video;

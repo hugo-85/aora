@@ -5,6 +5,7 @@ export interface VideoType extends Models.Document {
   thumbnail: string;
   prompt: string;
   video: string;
+  deleted: boolean;
 }
 
 export interface UserType extends Models.Document {
@@ -15,6 +16,6 @@ export interface UserType extends Models.Document {
 }
 
 export interface UserLikesType extends Models.Document {
-  videoId: VideoType;
+  videoId: string;
   userId: string;
 }

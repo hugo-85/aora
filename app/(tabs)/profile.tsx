@@ -4,7 +4,7 @@ import SearchLoading from "@components/SearchLoading";
 import VideoCard from "@components/VideoCard";
 import { useGlobal } from "contexts/GlobalProvider";
 import useVideos from "hooks/useVideos";
-import { View, Text, FlatList, RefreshControl } from "react-native";
+import { View, FlatList, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
@@ -28,7 +28,9 @@ export default function ProfilePage() {
         <FlatList
           data={videos}
           keyExtractor={(item) => item.$id}
-          renderItem={({ item }) => <VideoCard video={item} />}
+          renderItem={({ item }) => (
+            <VideoCard video={item} refreshVideos={refreshVideos} />
+          )}
           ListHeaderComponent={
             <ProfileHeader videosCount={videos?.length || 0} />
           }

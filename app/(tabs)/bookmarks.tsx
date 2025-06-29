@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { FlatList, RefreshControl } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import EmptyBookmarks from "@components/EmptyBookmarks";
 import VideoCard from "@components/VideoCard";
 import { useGlobal } from "contexts/GlobalProvider";
@@ -12,6 +12,7 @@ import {
 } from "lib/observable";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BookmarksHeader from "@components/BookmarksHeader";
+import SearchLoading from "@components/SearchLoading";
 
 export default function BookmarksPage() {
   const { user } = useGlobal();
@@ -23,7 +24,7 @@ export default function BookmarksPage() {
     key,
     paths,
   }: NotifyObserversType) => {
-    if (key !== "REFRESH" && !paths?.includes("BOOKMARKS")) return;
+    if (key !== "REFRESH" || !paths?.includes("BOOKMARKS")) return;
 
     await refreshBookmarks();
   };
@@ -55,23 +56,35 @@ export default function BookmarksPage() {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <FlatList
-        data={videos}
-        keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => (
-          <VideoCard video={item} refreshCallback={sendRefresh} />
-        )}
-        ListEmptyComponent={() => (
-          <EmptyBookmarks
-            title="No Videos Found"
-            subTitle="Go to explore and find awesome videos"
-          />
-        )}
-        ListHeaderComponent={() => <BookmarksHeader />}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
-        }
-      />
+      {isLoading ? (
+        <View>
+          <View className="flex-start justify-center items-center mt-10">
+            <SearchLoading />
+          </View>
+        </View>
+      ) : (
+        <FlatList
+          data={videos}
+          keyExtractor={(item) => item.$id}
+          renderItem={({ item }) => (
+            <VideoCard
+              video={item}
+              refreshCallback={sendRefresh}
+              refreshVideos={refreshBookmarks}
+            />
+          )}
+          ListEmptyComponent={() => (
+            <EmptyBookmarks
+              title="No Videos Found"
+              subTitle="Go to explore and find awesome videos"
+            />
+          )}
+          ListHeaderComponent={() => <BookmarksHeader />}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
