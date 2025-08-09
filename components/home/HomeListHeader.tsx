@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import SearchInput from "@components/customs/SearchInput";
 import TrendingVideos from "@components/home/TrendingVideos";
-import UserHeader from "@components/UserHeader";
+import UserHeader from "@components/userHeader/UserHeader";
 
 const HomeListHeader = () => {
   return (

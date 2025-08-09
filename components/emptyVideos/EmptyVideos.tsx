@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { View, Text, Image } from "react-native";
 import images from "@constants/images";
-import CustomButton from "./customs/CustomButton";
+import CustomButton from "../customs/CustomButton";
 import { router } from "expo-router";
 
 type EmptyVideosProps = {

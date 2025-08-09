@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Image } from "react-native";
 import icons from "@constants/icons";
 import { useGlobal } from "contexts/GlobalProvider";
-import InfoBox from "@components/InfoBox";
+import InfoBox from "@components/infoBox/InfoBox";
 import { FC } from "react";
 import { logOut } from "lib/appwrite";
 import { router } from "expo-router";

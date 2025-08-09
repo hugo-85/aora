@@ -1,7 +1,7 @@
-import EmptyVideos from "@components/EmptyVideos";
+import EmptyVideos from "@components/emptyVideos/EmptyVideos";
 import ProfileHeader from "@components/profile/ProfileHeader";
-import SearchLoading from "@components/SearchLoading";
-import VideoCard from "@components/VideoCard";
+import SearchLoading from "@components/searchLoading/SearchLoading";
+import VideoCard from "@components/videoCard/VideoCard";
 import { useGlobal } from "contexts/GlobalProvider";
 import useVideos from "hooks/useVideos";
 import { View, FlatList, RefreshControl } from "react-native";

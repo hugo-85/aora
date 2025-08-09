@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
-import EmptyBookmarks from "@components/EmptyBookmarks";
-import VideoCard from "@components/VideoCard";
+import EmptyBookmarks from "@components/emptyBookmarks/EmptyBookmarks";
+import VideoCard from "@components/videoCard/VideoCard";
 import { useGlobal } from "contexts/GlobalProvider";
 import useBookmarks from "hooks/useBookmarks";
 import {
@@ -11,8 +11,8 @@ import {
   unsubscribe,
 } from "lib/observable";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BookmarksHeader from "@components/BookmarksHeader";
-import SearchLoading from "@components/SearchLoading";
+import BookmarksHeader from "@components/bookmarksHeader/BookmarksHeader";
+import SearchLoading from "@components/searchLoading/SearchLoading";
 
 export default function BookmarksPage() {
   const { user } = useGlobal();

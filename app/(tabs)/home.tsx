@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import EmptyVideos from "@components/EmptyVideos";
+import EmptyVideos from "@components/emptyVideos/EmptyVideos";
 import useVideos from "hooks/useVideos";
 import HomeListHeader from "@components/home/HomeListHeader";
-import VideoCard from "@components/VideoCard";
+import VideoCard from "@components/videoCard/VideoCard";
 import {
   notifyObservers,
   NotifyObserversType,

@@ -3,10 +3,10 @@ import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSearch from "hooks/useSearch";
 import { useEffect } from "react";
-import EmptyVideos from "@components/EmptyVideos";
-import VideoCard from "@components/VideoCard";
+import EmptyVideos from "@components/emptyVideos/EmptyVideos";
+import VideoCard from "@components/videoCard/VideoCard";
 import SearchListHeader from "@components/search/SearchListHeader";
-import SearchLoading from "@components/SearchLoading";
+import SearchLoading from "@components/searchLoading/SearchLoading";
 
 export default function SearchPage() {
   const { query } = useLocalSearchParams();
