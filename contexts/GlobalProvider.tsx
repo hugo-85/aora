@@ -1,4 +1,4 @@
-import { getCurrentUser } from "lib/appwrite";
+import { getCurrentUser } from "@lib/appwrite";
 import { createContext, useContext, useEffect, useState } from "react";
 import { UserType } from "types/common";
 

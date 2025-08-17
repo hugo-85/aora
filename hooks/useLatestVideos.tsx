@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { getLatestVideos } from "lib/appwrite";
+import { getLatestVideos } from "@lib/appwrite";
 import { VideoType } from "types/common";
 
 export default function useLatestVideos() {

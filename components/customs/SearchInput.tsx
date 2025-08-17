@@ -39,7 +39,7 @@ const SearchInput: FC<SearchInputProps> = ({ placeholder, initialQuery }) => {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />
-        <Pressable onPress={handleOnPress}>
+        <Pressable onPress={handleOnPress} testID="search-button">
           <Image
             source={icons.search}
             className={`w-6 h-6 ${value === "" || value.length < 3 ? "opacity-10" : "opacity-100"}`}

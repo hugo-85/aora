@@ -3,7 +3,6 @@ import { View, Text, Image, Pressable, Alert } from "react-native";
 import { VideoType } from "types/common";
 import icons from "@constants/icons";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { useEvent } from "expo";
 import {
   Menu,
   MenuOptions,
@@ -17,8 +16,8 @@ import {
   deleteVideo,
   likeVideo,
   unlikeVideo,
-} from "lib/appwrite";
-import { useGlobal } from "contexts/GlobalProvider";
+} from "@lib/appwrite";
+import { useGlobal } from "@contexts/GlobalProvider";
 
 type VideoCardMenuProps = {
   videoId: string;
@@ -30,7 +29,7 @@ const VideoCardMenu: FC<VideoCardMenuProps> = ({ videoId, refreshVideos }) => {
     try {
       await deleteVideo(videoId);
       Alert.alert("Success", "Video deleted successfully");
-      refreshVideos(); //mirar no se actualiza la lista de videos, quizas deba usar el refreshCallback
+      refreshVideos();
     } catch (error: any) {
       Alert.alert("Error", error.message);
     }
@@ -38,7 +37,7 @@ const VideoCardMenu: FC<VideoCardMenuProps> = ({ videoId, refreshVideos }) => {
 
   return (
     <Menu>
-      <MenuTrigger>
+      <MenuTrigger testID="menu-trigger">
         <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
       </MenuTrigger>
       <MenuOptions
@@ -53,7 +52,7 @@ const VideoCardMenu: FC<VideoCardMenuProps> = ({ videoId, refreshVideos }) => {
           },
         }}
       >
-        <MenuOption onSelect={handleDelete}>
+        <MenuOption testID="delete-option" onSelect={handleDelete}>
           <View className="flex-row gap-2 items-center">
             <AntDesign name="delete" size={18} color="white" />
             <Text className="text-white font-psemibold text-sm">Delete</Text>
@@ -86,13 +85,8 @@ const VideoCard: FC<VideoCardProps> = ({
   const [play, setPlay] = useState(false);
   const player = useVideoPlayer({ uri: videoUrl }, (player) => {
     player.loop = false;
-    // player.play();
-  });
-  const { isPlaying } = useEvent(player, "playingChange", {
-    isPlaying: player.playing,
   });
   const [isLiked, setIsLiked] = useState(false);
-  // const { refreshVideos } = useVideos();
 
   useEffect(() => {
     const checkIsLiked = async () => {
@@ -106,7 +100,7 @@ const VideoCard: FC<VideoCardProps> = ({
   }, [video]);
 
   const handleOnPress = () => {
-    if (isPlaying) {
+    if (player.playing) {
       setPlay(false);
       player.pause();
     } else {
@@ -134,6 +128,7 @@ const VideoCard: FC<VideoCardProps> = ({
         <View className="justify-center items-center flex-row flex-1">
           <View className="w-[46px] h-[46px] rounded-lg border border-secondary justify-center items-center p.0.5">
             <Image
+              testID="avatar"
               source={{ uri: avatar }}
               className="w-full h-full rounded-lg"
               resizeMode="cover"
@@ -147,12 +142,22 @@ const VideoCard: FC<VideoCardProps> = ({
               >
                 {title}
               </Text>
-              <Pressable onPress={handleOnPressLike}>
+              <Pressable testID="like-button" onPress={handleOnPressLike}>
                 {isLiked && (
-                  <Ionicons name="bookmark" size={18} color="#ff9500" />
+                  <Ionicons
+                    testID="like-icon"
+                    name="bookmark"
+                    size={18}
+                    color="#ff9500"
+                  />
                 )}
                 {!isLiked && (
-                  <Ionicons name="bookmark-outline" size={18} color="white" />
+                  <Ionicons
+                    testID="not-like-icon"
+                    name="bookmark-outline"
+                    size={18}
+                    color="white"
+                  />
                 )}
               </Pressable>
             </View>
@@ -166,7 +171,10 @@ const VideoCard: FC<VideoCardProps> = ({
         </View>
       </View>
       {play ? (
-        <View className="w-full h-60 max-h-60 rounded-xl mt-3 relative justify-center items-center">
+        <View
+          testID="video"
+          className="w-full h-60 max-h-60 rounded-xl mt-3 relative justify-center items-center"
+        >
           <VideoView
             style={{
               width: 400,
@@ -186,6 +194,7 @@ const VideoCard: FC<VideoCardProps> = ({
           onPress={handleOnPress}
           className="w-full h-60 rounded-xl mt-3 relative justify-center items-center
           active:opacity-40"
+          testID="video-thumbnail"
         >
           <Image
             source={{ uri: thumbnail }}

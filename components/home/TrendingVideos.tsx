@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { FlatList, ViewToken } from "react-native";
-import useLatestVideos from "hooks/useLatestVideos";
+import useLatestVideos from "@hooks/useLatestVideos";
 import { VideoType } from "types/common";
 import TrendingVideo from "./TrendingVideo";
 

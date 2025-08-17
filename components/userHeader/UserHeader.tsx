@@ -1,6 +1,6 @@
 import { View, Text, Image } from "react-native";
 import images from "@constants/images";
-import { useGlobal } from "contexts/GlobalProvider";
+import { useGlobal } from "@contexts/GlobalProvider";
 
 const UserHeader = () => {
   const { user } = useGlobal();
@@ -17,6 +17,7 @@ const UserHeader = () => {
           source={images.logoSmall}
           className="w-9 h-10"
           resizeMode="contain"
+          testID="avatar"
         />
       </View>
     </View>

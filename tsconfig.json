@@ -6,6 +6,9 @@
     "paths": {
       "@components/*": ["components/*"],
       "@constants/*": ["constants/*"],
+      "@contexts/*": ["contexts/*"],
+      "@lib/*": ["lib/*"],
+      "@hooks/*": ["hooks/*"]
     },
     "jsx": "react-jsx" // para TypeScript 4.1 o superior
   }

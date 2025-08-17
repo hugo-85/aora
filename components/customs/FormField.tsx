@@ -44,7 +44,10 @@ const FormField: FC<FormFieldProps> = ({
           onBlur={() => setIsFocused(false)}
         />
         {name === "password" && (
-          <Pressable onPress={() => setShowPassword(!showPassword)}>
+          <Pressable
+            onPress={() => setShowPassword(!showPassword)}
+            testID="toggle-password-visibility"
+          >
             <Image
               source={showPassword ? icons.eye : icons.eyeHide}
               className="w-6 h-6"

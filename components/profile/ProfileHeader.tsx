@@ -1,9 +1,9 @@
-import { View, Text, Pressable, Image } from "react-native";
+import { View, Pressable, Image } from "react-native";
 import icons from "@constants/icons";
-import { useGlobal } from "contexts/GlobalProvider";
+import { useGlobal } from "@contexts/GlobalProvider";
 import InfoBox from "@components/infoBox/InfoBox";
 import { FC } from "react";
-import { logOut } from "lib/appwrite";
+import { logOut } from "@lib/appwrite";
 import { router } from "expo-router";
 
 type ProfileHeaderProps = {
@@ -23,7 +23,11 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({ videosCount }) => {
 
   return (
     <View className="w-full justify-center items-center mt-2 mb-6 px-4">
-      <Pressable className="w-full items-end mb-6" onPress={logout}>
+      <Pressable
+        className="w-full items-end mb-6"
+        onPress={logout}
+        testID="logout-button"
+      >
         <Image source={icons.logout} className="w-6 h-6" resizeMode="contain" />
       </Pressable>
       <View className="w-16 h-16 border border-secondary rounded-lg justify-center items-center">
@@ -31,6 +35,7 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({ videosCount }) => {
           source={{ uri: user?.avatar }}
           className="w-[90%] h-[90%] rounded-lg"
           resizeMode="cover"
+          testID="avatar"
         />
       </View>
       <InfoBox

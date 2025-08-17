@@ -3,9 +3,7 @@ import { Pressable, ImageBackground, Image } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { VideoType } from "types/common";
 import icons from "@constants/icons";
-import { Models } from "react-native-appwrite";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { useEvent } from "expo";
 
 const zoomIn = {
   0: {
@@ -46,11 +44,8 @@ const TrendingVideo: FC<TrendingVideoProps> = ({ activeVideo, video }) => {
   const [play, setPlay] = useState(false);
   const player = useVideoPlayer(video.video, (player) => {
     player.loop = false;
-    // player.play();
   });
-  const { isPlaying } = useEvent(player, "playingChange", {
-    isPlaying: player.playing,
-  });
+  const isPlaying = player.playing;
 
   const handleOnPress = () => {
     if (isPlaying) {
@@ -67,6 +62,7 @@ const TrendingVideo: FC<TrendingVideoProps> = ({ activeVideo, video }) => {
       className="mr-5"
       animation={activeVideo?.$id === video.$id ? zoomIn : zoomOut}
       duration={500}
+      testID="video-item"
     >
       {play ? (
         <VideoView
@@ -82,11 +78,13 @@ const TrendingVideo: FC<TrendingVideoProps> = ({ activeVideo, video }) => {
           allowsPictureInPicture
           nativeControls
           contentFit="contain"
+          testID="video-player"
         />
       ) : (
         <Pressable
           onPress={handleOnPress}
           className="relative justify-center items-center active:opacity-70"
+          testID="video-thumbnail"
         >
           <ImageBackground
             source={{ uri: video.thumbnail }}

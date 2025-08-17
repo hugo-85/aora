@@ -31,6 +31,7 @@ export default function SearchLoading() {
           source={images.empty}
           className="w-56 h-56"
           resizeMode="contain"
+          testID="search-loading-image"
         />
       </Animatable.View>
       <Text className="text-3xl font-psemibold text-yellow-700 tracking-[8px]">
