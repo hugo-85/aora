@@ -14,15 +14,15 @@ Aora is a mobile application to discover, share, and explore short videos in a c
 
 ### Welcome Screen
 
-![Welcome Screen](assets/images/aora-poster3.png)
+<img src="assets/images/aora-poster3.png" alt="Welcome Screen" width="300" />
 
 ### Home Screen
 
-![Home Screen](assets/images/aora-poster2.png)
+<img src="assets/images/aora-poster2.png" alt="Home Screen" width="300" />
 
 ### Profile Screen
 
-![Profile Screen](assets/images/aora-poster1.png)
+<img src="assets/images/aora-poster1.png" alt="Profile Screen" width="300" />
 
 ## Installation and Usage
 
